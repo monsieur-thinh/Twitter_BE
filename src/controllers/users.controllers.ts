@@ -17,6 +17,7 @@ import { USERS_MESSAGES } from '~/constants/messages'
 import databaseService from '~/services/database.services'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { UserVerifyStatus } from '~/constants/enums'
+import { pick } from 'lodash'
 
 export const loginController = async (
   req: Request<ParamsDictionary, any, LoginReqBody>,
