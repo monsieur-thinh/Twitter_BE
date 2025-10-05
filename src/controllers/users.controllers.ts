@@ -9,7 +9,9 @@ import {
   VerifyEmailReqBody,
   LoginReqBody,
   ResetPasswordReqBody,
-  updateMeReqBody
+  updateMeReqBody,
+  GetProfileReqParams,
+  FollowUserReqBody
 } from '~/models/requests/Users.requests'
 import { ObjectId } from 'mongodb'
 import User from '~/models/schemas/User.schema'
@@ -158,4 +160,29 @@ export const updateMeController = async (
     message: USERS_MESSAGES.UPDATE_ME_SUCCESS,
     result: user
   })
+}
+
+export const getUserProfileController = async (
+  req: Request<ParamsDictionary, any, GetProfileReqParams>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { username } = req.params
+  const user = await usersService.getUserProfile(username)
+  console.log('user profile: ', user)
+  res.json({
+    message: USERS_MESSAGES.GET_USER_PROFILE_SUCCESS,
+    result: user
+  })
+}
+
+export const followUserController = async (
+  req: Request<ParamsDictionary, any, FollowUserReqBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { user_id } = req.decoded_authorization as TokenPayload
+  const { followed_user_id } = req.body
+  const result = await usersService.followUser(user_id, followed_user_id)
+  res.json(result)
 }
