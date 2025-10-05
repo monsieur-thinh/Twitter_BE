@@ -78,7 +78,7 @@ const nameSchema: ParamSchema = {
   },
   isLength: {
     errorMessage: USERS_MESSAGES.NAME_LENGTH,
-    options: { min: 1, max: 50 }
+    options: { min: 1, max: 100 }
   },
   isString: {
     errorMessage: USERS_MESSAGES.NAME_MUST_BE_STRING
@@ -467,8 +467,8 @@ export const updateMeValidator = validate(
         },
         trim: true,
         isLength: {
-          errorMessage: USERS_MESSAGES.WEBSITE_LENGTH,
-          options: { min: 1, max: 200 }
+          options: { min: 1, max: 200 },
+          errorMessage: USERS_MESSAGES.WEBSITE_LENGTH
         }
       },
       username: {
@@ -478,8 +478,8 @@ export const updateMeValidator = validate(
         },
         trim: true,
         isLength: {
-          errorMessage: USERS_MESSAGES.USERNAME_LENGTH,
-          options: { min: 1, max: 50 }
+          options: { min: 1, max: 100 },
+          errorMessage: USERS_MESSAGES.USERNAME_LENGTH
         }
       },
       avatar: imageUrlSchema,

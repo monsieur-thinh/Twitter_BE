@@ -155,6 +155,6 @@ export const updateMeController = async (
   const user = await usersService.updateMe(user_id, body)
   res.json({
     message: USERS_MESSAGES.UPDATE_ME_SUCCESS,
-    data: user
+    result: user
   })
 }

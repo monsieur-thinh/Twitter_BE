@@ -257,8 +257,7 @@ class UsersService {
         }
       }
     )
-    // xem lại đoạn này
-    return (user as any)?.value
+    return user
   }
 }
 
