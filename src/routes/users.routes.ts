@@ -10,7 +10,9 @@ import {
   resendVerifyEmailController,
   resetPasswordController,
   getMeController,
-  updateMeController
+  updateMeController,
+  getUserProfileController,
+  followUserController
 } from '~/controllers/users.controllers'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
 // Import các middleware cho người dùng
@@ -24,7 +26,8 @@ import {
   resetPasswordValidator,
   verifiedUserValidator,
   verifyForgotPasswordTokenValidator,
-  updateMeValidator
+  updateMeValidator,
+  followValidator
 } from '~/middlewares/users.middlewares'
 import { updateMeReqBody } from '~/models/requests/Users.requests'
 import { wrapRequestHandler } from '~/utils/handlers'
@@ -142,6 +145,30 @@ usersRouter.patch(
     'cover_photo'
   ]),
   wrapRequestHandler(updateMeController)
+)
+
+/**
+ * Description: get user profile
+ * path: /users/:username
+ * Method: GET
+ * status: doing
+ */
+usersRouter.get('/:username', wrapRequestHandler(getUserProfileController))
+
+/**
+ * Description: Follow someone
+ * path: /users/:username
+ * Method: POST
+ * Body: { followed_user_id: string }
+ * Header: { Authorization: Bearer <access_token> }
+ * status: doing
+ */
+usersRouter.post(
+  '/follow',
+  accessTokenValidator,
+  verifiedUserValidator,
+  followValidator,
+  wrapRequestHandler(followUserController)
 )
 
 export default usersRouter
