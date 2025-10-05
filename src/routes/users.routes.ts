@@ -12,6 +12,7 @@ import {
   getMeController,
   updateMeController
 } from '~/controllers/users.controllers'
+import { filterMiddleware } from '~/middlewares/common.middlewares'
 // Import các middleware cho người dùng
 import {
   accessTokenValidator,
@@ -25,6 +26,7 @@ import {
   verifyForgotPasswordTokenValidator,
   updateMeValidator
 } from '~/middlewares/users.middlewares'
+import { updateMeReqBody } from '~/models/requests/Users.requests'
 import { wrapRequestHandler } from '~/utils/handlers'
 const usersRouter = Router()
 // Định nghĩa router cho các route liên quan đến người dùng
@@ -129,6 +131,16 @@ usersRouter.patch(
   accessTokenValidator,
   verifiedUserValidator,
   updateMeValidator,
+  filterMiddleware<updateMeReqBody>([
+    'name',
+    'date_of_birth',
+    'bio',
+    'location',
+    'website',
+    'username',
+    'avatar',
+    'cover_photo'
+  ]),
   wrapRequestHandler(updateMeController)
 )
 
