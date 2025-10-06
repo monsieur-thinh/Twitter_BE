@@ -311,6 +311,29 @@ class UsersService {
       message: USERS_MESSAGES.USER_ALREADY_FOLLOWED
     }
   }
+
+  async unfollowUser(user_id: string, followed_user_id: string) {
+    const userFollowed = await databaseService.followers.findOne({
+      user_id: new ObjectId(user_id),
+      followed_user_id: new ObjectId(followed_user_id)
+    })
+    // không tìm thấy document followers
+    // nghĩa là chưa follow hoặc đã unfollow rồi
+    if (userFollowed === null) {
+      return {
+        message: USERS_MESSAGES.ALREADY_UNFOLLOWED
+      }
+    }
+    // tìm thấy document followers
+    // nghĩa là đã follow, thì tiến hành xóa document
+    await databaseService.followers.deleteOne({
+      user_id: new ObjectId(user_id),
+      followed_user_id: new ObjectId(followed_user_id)
+    })
+    return {
+      message: USERS_MESSAGES.UNFOLLOW_USER_SUCCESS
+    }
+  }
 }
 
 const usersService = new UsersService()
