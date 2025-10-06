@@ -76,5 +76,9 @@ export const USERS_MESSAGES = {
   // unfollow user
   INVALID_USER_ID: 'invalid user id',
   ALREADY_UNFOLLOWED: 'already unfollowed',
-  UNFOLLOW_USER_SUCCESS: 'unfollow user success'
+  UNFOLLOW_USER_SUCCESS: 'unfollow user success',
+  // unique user
+  USERNAME_INVALID:
+    'Username must be 4-15 characters long, can include letters, numbers, underscores, and cannot be all numbers',
+  USERNAME_ALREADY_EXISTS: 'Username already exists'
 } as const
