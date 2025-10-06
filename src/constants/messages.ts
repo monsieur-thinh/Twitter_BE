@@ -72,5 +72,9 @@ export const USERS_MESSAGES = {
   // follow user
   FOLLOW_USER_SUCCESS: 'follow user success',
   INVALID_FOLLOWED_USER_ID: 'invalid followed user id',
-  USER_ALREADY_FOLLOWED: 'user already followed'
+  USER_ALREADY_FOLLOWED: 'user already followed',
+  // unfollow user
+  INVALID_USER_ID: 'invalid user id',
+  ALREADY_UNFOLLOWED: 'already unfollowed',
+  UNFOLLOW_USER_SUCCESS: 'unfollow user success'
 } as const
