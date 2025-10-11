@@ -80,5 +80,9 @@ export const USERS_MESSAGES = {
   // unique user
   USERNAME_INVALID:
     'Username must be 4-15 characters long, can include letters, numbers, underscores, and cannot be all numbers',
-  USERNAME_ALREADY_EXISTS: 'Username already exists'
+  USERNAME_ALREADY_EXISTS: 'Username already exists',
+  // change password
+  OLD_PASSWORD_INCORRECT: 'Old password is incorrect',
+  OLD_PASSWORD_NOT_MATCHES: 'Old password does not match',
+  CHANGE_PASSWORD_SUCCESS: 'Change password success'
 } as const
