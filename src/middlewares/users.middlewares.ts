@@ -16,7 +16,7 @@ import { UserVerifyStatus } from '~/constants/enums'
 import { REGEX_USERNAME } from '~/constants/reges'
 // This middleware validates the login request body
 
-const passwordSChema: ParamSchema = {
+const passwordSchema: ParamSchema = {
   in: ['body'],
   notEmpty: {
     errorMessage: USERS_MESSAGES.PASSWORD_IS_REQUIRED
@@ -209,29 +209,7 @@ export const loginValidator = validate(
           }
         }
       },
-      password: {
-        in: ['body'],
-        notEmpty: {
-          errorMessage: USERS_MESSAGES.PASSWORD_IS_REQUIRED
-        },
-        isString: {
-          errorMessage: USERS_MESSAGES.PASSWORD_MUST_BE_STRING
-        },
-        isLength: {
-          options: { min: 6, max: 50 },
-          errorMessage: USERS_MESSAGES.PASSWORD_LENGTH
-        },
-        isStrongPassword: {
-          options: {
-            minLength: 6,
-            minLowercase: 1,
-            minUppercase: 1,
-            minNumbers: 1,
-            minSymbols: 1
-          },
-          errorMessage: USERS_MESSAGES.PASSWORD_STRONG
-        }
-      }
+      password: passwordSchema
     },
     ['body']
   )
@@ -262,7 +240,7 @@ export const registerValidator = validate(
           }
         }
       },
-      password: passwordSChema,
+      password: passwordSchema,
       confirm_password: confirmPasswordSchema,
       date_of_birth: dateOfBirthSchema
     },
@@ -427,7 +405,7 @@ export const verifyForgotPasswordTokenValidator = validate(
 export const resetPasswordValidator = validate(
   checkSchema(
     {
-      password: passwordSChema,
+      password: passwordSchema,
       confirm_password: confirmPasswordSchema,
       forgot_password_token: forgotPasswordTokenSchema
     },
@@ -536,4 +514,35 @@ export const unfollowValidator = validate(
     },
     ['params']
   )
+)
+
+export const changePasswordValidator = validate(
+  checkSchema({
+    old_password: {
+      ...passwordSchema,
+      custom: {
+        options: async (value, { req }) => {
+          const { user_id } = (req as Request).decoded_authorization as TokenPayload
+          const user = await databaseService.users.findOne({ _id: new ObjectId(user_id) })
+          if (user === null) {
+            throw new ErrorWithStatus({
+              message: USERS_MESSAGES.USER_NOT_FOUND,
+              status: HTTP_STATUS.NOT_FOUND
+            })
+          }
+          const { password } = user
+          const isMatch = hashPassword(value) === password
+          if (!isMatch) {
+            throw new ErrorWithStatus({
+              message: USERS_MESSAGES.OLD_PASSWORD_NOT_MATCHES,
+              status: HTTP_STATUS.UNAUTHORIZED
+            })
+          }
+          return true
+        }
+      }
+    },
+    password: passwordSchema,
+    confirm_new_password: confirmPasswordSchema
+  })
 )

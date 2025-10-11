@@ -12,7 +12,8 @@ import {
   updateMeReqBody,
   GetProfileReqParams,
   FollowUserReqBody,
-  UnfollowReqParams
+  UnfollowReqParams,
+  ChangePasswordReqBody
 } from '~/models/requests/Users.requests'
 import { ObjectId } from 'mongodb'
 import User from '~/models/schemas/User.schema'
@@ -41,7 +42,6 @@ export const registerController = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  // throw new Error('Lỗi rồi baka onii-chan')
   // const { password, email, name } = req.body
   const result = await usersService.register(req.body)
   console.log('result loginController ' + result)
@@ -192,5 +192,16 @@ export const unfollowUserController = async (req: Request<UnfollowReqParams>, re
   const { user_id } = req.decoded_authorization as TokenPayload
   const { user_id: followed_user_id } = req.params
   const result = await usersService.unfollowUser(user_id, followed_user_id)
+  res.json(result)
+}
+
+export const changePasswordController = async (
+  req: Request<ParamsDictionary, any, ChangePasswordReqBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { user_id } = req.decoded_authorization as TokenPayload
+  const { password } = req.body
+  const result = await usersService.changePassword(user_id, password)
   res.json(result)
 }
