@@ -1,4 +1,4 @@
-import express from 'express'
+import express, { ErrorRequestHandler } from 'express'
 import usersRouter from '~/routes/users.routes'
 import databaseService from '~/services/database.services'
 // dotenv
@@ -17,7 +17,7 @@ app.use(express.json()) // Middleware để parse JSON body
 app.use('/users', usersRouter)
 
 // default error handler
-app.use(defaultErrorHandler)
+app.use(defaultErrorHandler as unknown as ErrorRequestHandler)
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`)
