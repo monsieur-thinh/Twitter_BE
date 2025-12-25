@@ -84,5 +84,7 @@ export const USERS_MESSAGES = {
   // change password
   OLD_PASSWORD_INCORRECT: 'Old password is incorrect',
   OLD_PASSWORD_NOT_MATCHES: 'Old password does not match',
-  CHANGE_PASSWORD_SUCCESS: 'Change password success'
+  CHANGE_PASSWORD_SUCCESS: 'Change password success',
+  // oauth google
+  GOOGLE_EMAIL_NOT_VERIFIED: 'Google email is not verified'
 } as const

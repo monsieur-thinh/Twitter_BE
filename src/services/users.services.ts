@@ -12,6 +12,7 @@ import { USERS_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Errors'
 import HTTP_STATUS from '~/constants/httpStatus'
 import Follower from '~/models/schemas/Followers.schema'
+import axios from 'axios'
 config() // Load environment variables from .env file
 
 class UsersService {
@@ -127,6 +128,89 @@ class UsersService {
     }
   }
 
+  private async getOauthGoogleToken(code: string) {
+    const body = {
+      code,
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET,
+      redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+      grant_type: 'authorization_code'
+    }
+    const { data } = await axios.post('https://oauth2.googleapis.com/token', body, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    })
+    return data as {
+      id_token: string
+      access_token: string
+    }
+  }
+
+  private async getGoogleUserInfo(access_token: string, id_token: string) {
+    const userInfo = await axios.get('https://www.googleapis.com/oauth2/v1/userinfo', {
+      headers: {
+        Authorization: `Bearer ${id_token}`
+      },
+      params: {
+        access_token,
+        alt: 'json'
+      }
+    })
+    return userInfo.data as {
+      id: string
+      email: string
+      name: string
+      picture: string
+      verified_email: boolean
+      locale: string
+      given_name: string
+      family_name: string
+    }
+  }
+
+  async oauthGoogle(code: string) {
+    const { id_token, access_token } = await this.getOauthGoogleToken(code)
+    const userInfo = await this.getGoogleUserInfo(access_token, id_token)
+
+    if (!userInfo.verified_email) {
+      throw new ErrorWithStatus({
+        message: USERS_MESSAGES.GOOGLE_EMAIL_NOT_VERIFIED,
+        status: HTTP_STATUS.BAD_REQUEST
+      })
+    }
+    // kiểm tra tồn tại email trong database
+    const user = await databaseService.users.findOne({ email: userInfo.email })
+    // const isEmailExists = await this.checkEmailExists(userInfo.email)
+    // nếu tồn tại thì login
+    if (user) {
+      const [accessToken, refreshToken] = await this.signAccessAndRefreshToken({
+        user_id: user._id.toString(),
+        verify: UserVerifyStatus.Verified
+      })
+      await databaseService.refreshTokens.insertOne(
+        new RefreshToken({ user_id: new ObjectId(user._id), token: refreshToken })
+      )
+      return {
+        accessToken,
+        refreshToken,
+        newUser: 0,
+        verify: UserVerifyStatus.Verified
+      }
+    } else {
+      // không thì tạo mới user
+      const password = Math.random().toString(36).substring(2.17)
+      const data = await this.register({
+        email: userInfo.email,
+        name: userInfo.name,
+        date_of_birth: new Date().toISOString(),
+        password,
+        confirm_password: password
+      })
+      return { ...data, newUser: 1, verify: UserVerifyStatus.Unverified }
+    }
+  }
+
   async logout(refresh_token: string) {
     const result = await databaseService.refreshTokens.deleteOne({ token: refresh_token })
     if (result.deletedCount === 0) {
@@ -151,6 +235,9 @@ class UsersService {
       ])
     ])
     const [accessToken, refreshToken] = token
+    await databaseService.refreshTokens.insertOne(
+      new RefreshToken({ user_id: new ObjectId(user_id), token: refreshToken })
+    )
     return {
       accessToken,
       refreshToken

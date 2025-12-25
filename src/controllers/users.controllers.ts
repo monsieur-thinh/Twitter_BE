@@ -21,7 +21,9 @@ import { USERS_MESSAGES } from '~/constants/messages'
 import databaseService from '~/services/database.services'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { UserVerifyStatus } from '~/constants/enums'
-import { pick } from 'lodash'
+import { config } from 'dotenv'
+
+config()
 
 export const loginController = async (
   req: Request<ParamsDictionary, any, LoginReqBody>,
@@ -35,6 +37,18 @@ export const loginController = async (
     message: USERS_MESSAGES.LOGIN_SUCCESS,
     result
   })
+}
+
+export const oauthGoogleController = async (
+  req: Request<ParamsDictionary, any, any>,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  // console.log('oauthGoogleController req.body: ', req.url)
+  const { code } = req.query
+  const result = await usersService.oauthGoogle(code as string)
+  const urlRedirect = `${process.env.CLIENT_REDIRECT_CALLBACK}?access_token=${result.accessToken}&refresh_token=${result.refreshToken}&new_user=${result.newUser}&verify=${result.verify}`
+  res.redirect(urlRedirect)
 }
 
 export const registerController = async (
@@ -66,45 +80,49 @@ export const verifyEmailController = async (
   req: Request<ParamsDictionary, any, VerifyEmailReqBody>,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   const { user_id } = req.decoded_email_verify_token as TokenPayload // Giả sử bạn đã xác thực người dùng và lưu thông tin vào req.user
   const user = await databaseService.users.findOne({ _id: new ObjectId(user_id) })
   // Nếu không tìm thấy người dùng, trả về lỗi 404
   if (!user) {
-    return res.status(HTTP_STATUS.NOT_FOUND).json({
+    res.status(HTTP_STATUS.NOT_FOUND).json({
       message: USERS_MESSAGES.USER_NOT_FOUND
     })
+    return
   }
   // Đã verify rồi thì sẽ không báo lỗi
   // mà sẽ trả về status OK với message là đã verify email trước đó
   if (user.email_verify_token === '') {
-    return res.json({
+    res.json({
       message: USERS_MESSAGES.EMAIL_ALREADY_VERIFIED_BEFORE
     })
+    return
   }
   const result = await usersService.verifyEmail(user_id)
-  return res.json({
+  res.json({
     message: USERS_MESSAGES.EMAIL_VERIFY_SUCCESS,
     result
   })
 }
 
 // đã đủ
-export const resendVerifyEmailController = async (req: Request, res: Response, next: NextFunction) => {
+export const resendVerifyEmailController = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { user_id } = req.decoded_authorization as TokenPayload // Giả sử bạn đã xác thực người dùng và lưu thông tin vào req.user
   const user = await databaseService.users.findOne({ _id: new ObjectId(user_id) })
   if (!user) {
-    return res.status(HTTP_STATUS.NOT_FOUND).json({
+    res.status(HTTP_STATUS.NOT_FOUND).json({
       message: USERS_MESSAGES.USER_NOT_FOUND
     })
+    return
   }
   if (user.verify === UserVerifyStatus.Verified) {
-    return res.json({
+    res.json({
       message: USERS_MESSAGES.EMAIL_ALREADY_VERIFIED_BEFORE
     })
+    return
   }
   const result = await usersService.resendVerifyEmail(user_id)
-  return res.json(result)
+  res.json(result)
 }
 
 // đã xong
@@ -112,10 +130,10 @@ export const forgotPasswordController = async (
   req: Request<ParamsDictionary, any, ForgotPasswordReqBody>,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   const { _id, verify } = req.user as User // Giả sử bạn đã xác thực người dùng và lưu thông tin vào req.user
   const result = await usersService.forgotPassword({ user_id: (_id as ObjectId).toString(), verify })
-  return res.json(result)
+  res.json(result)
 }
 
 // đã xong
@@ -153,7 +171,7 @@ export const updateMeController = async (
   req: Request<ParamsDictionary, any, updateMeReqBody>,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   const { user_id } = req.decoded_authorization as TokenPayload
   const { body } = req
   const user = await usersService.updateMe(user_id, body)
@@ -167,7 +185,7 @@ export const getUserProfileController = async (
   req: Request<ParamsDictionary, any, GetProfileReqParams>,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   const { username } = req.params
   const user = await usersService.getUserProfile(username)
   console.log('user profile: ', user)
@@ -181,14 +199,18 @@ export const followUserController = async (
   req: Request<ParamsDictionary, any, FollowUserReqBody>,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   const { user_id } = req.decoded_authorization as TokenPayload
   const { followed_user_id } = req.body
   const result = await usersService.followUser(user_id, followed_user_id)
   res.json(result)
 }
 
-export const unfollowUserController = async (req: Request<UnfollowReqParams>, res: Response, next: NextFunction) => {
+export const unfollowUserController = async (
+  req: Request<UnfollowReqParams, any, any>,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   const { user_id } = req.decoded_authorization as TokenPayload
   const { user_id: followed_user_id } = req.params
   const result = await usersService.unfollowUser(user_id, followed_user_id)
@@ -199,7 +221,7 @@ export const changePasswordController = async (
   req: Request<ParamsDictionary, any, ChangePasswordReqBody>,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   const { user_id } = req.decoded_authorization as TokenPayload
   const { password } = req.body
   const result = await usersService.changePassword(user_id, password)

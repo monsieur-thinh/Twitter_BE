@@ -14,7 +14,8 @@ import {
   getUserProfileController,
   followUserController,
   unfollowUserController,
-  changePasswordController
+  changePasswordController,
+  oauthGoogleController
 } from '~/controllers/users.controllers'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
 // Import các middleware cho người dùng
@@ -45,6 +46,15 @@ const usersRouter = Router()
  * Body: {  email: string, password: string }
  */
 usersRouter.post('/login', loginValidator, wrapRequestHandler(loginController))
+
+/**
+ * Description: Route để OAuth Google
+ * path: /users/oauth/google
+ * method: GET
+ * Body: {}
+ * Query: { code: string }
+ */
+usersRouter.get('/oauth/google', wrapRequestHandler(oauthGoogleController))
 /**
  * Description: Route để đăng xuất người dùng
  * path: /users/logout
