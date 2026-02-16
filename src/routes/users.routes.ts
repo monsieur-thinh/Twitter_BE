@@ -34,7 +34,7 @@ import {
   unfollowValidator,
   changePasswordValidator
 } from '~/middlewares/users.middlewares'
-import { updateMeReqBody } from '~/models/requests/Users.requests'
+import { updateMeReqBody, UnfollowReqParams } from '~/models/requests/Users.requests'
 import { wrapRequestHandler } from '~/utils/handlers'
 const usersRouter = Router()
 // Định nghĩa router cho các route liên quan đến người dùng
@@ -197,7 +197,7 @@ usersRouter.delete(
   accessTokenValidator,
   verifiedUserValidator,
   unfollowValidator,
-  wrapRequestHandler(unfollowUserController)
+  wrapRequestHandler<UnfollowReqParams>(unfollowUserController)
 )
 
 /**
