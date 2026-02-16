@@ -107,7 +107,7 @@ export const verifyEmailController = async (
 
 // đã đủ
 export const resendVerifyEmailController = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const { user_id } = req.decoded_authorization as TokenPayload // Giả sử bạn đã xác thực người dùng và lưu thông tin vào req.user
+  const { user_id } = req.decoded_authorization as TokenPayload
   const user = await databaseService.users.findOne({ _id: new ObjectId(user_id) })
   if (!user) {
     res.status(HTTP_STATUS.NOT_FOUND).json({
@@ -131,7 +131,7 @@ export const forgotPasswordController = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  const { _id, verify } = req.user as User // Giả sử bạn đã xác thực người dùng và lưu thông tin vào req.user
+  const { _id, verify } = req.user as User
   const result = await usersService.forgotPassword({ user_id: (_id as ObjectId).toString(), verify })
   res.json(result)
 }

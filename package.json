@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "npx nodemon",
+    "dev": "npx nodemon --development",
     "build": "rimraf ./dist && tsc && tsc-alias",
-    "start": "node dist/index.js",
+    "start": "node dist/index.js --production",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prettier": "prettier --check .",
@@ -19,7 +19,9 @@
   "type": "commonjs",
   "devDependencies": {
     "@eslint/js": "^9.26.0",
+    "@types/formidable": "^3.4.6",
     "@types/lodash": "^4.17.17",
+    "@types/minimist": "^1.2.5",
     "@types/node": "^22.15.18",
     "eslint": "^9.26.0",
     "eslint-config-prettier": "^10.1.5",
@@ -40,8 +42,11 @@
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "express-validator": "^7.2.1",
+    "formidable": "^3.5.4",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
-    "mongodb": "^6.16.0"
+    "minimist": "^1.2.8",
+    "mongodb": "^6.16.0",
+    "sharp": "^0.34.5"
   }
 }
