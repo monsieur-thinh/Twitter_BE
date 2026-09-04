@@ -33,11 +33,11 @@ app.use(express.json()) // Middleware để parse JSON body
 
 app.use('/users', usersRouter)
 app.use('/medias', mediaRouter)
-app.use('/static', express.static(UPLOAD_DIR))
-// app.use('/static', staticRouter)
+// app.use('/static', express.static(UPLOAD_DIR))
+app.use('/static', staticRouter)
 
 // default error handler
-app.use(defaultErrorHandler as unknown as ErrorRequestHandler)
+app.use(defaultErrorHandler as ErrorRequestHandler)
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`)

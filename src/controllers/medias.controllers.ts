@@ -17,7 +17,13 @@ export const updloadSingerImageController = async (
   })
 }
 
-export const serveImageController = async (req: Request, res: Response, next: NextFunction) => {
+export const serveImageController = (req: Request, res: Response, next: NextFunction) => {
   const { name } = req.params
-  res.sendFile(path.resolve(UPLOAD_DIR, name))
+  res.sendFile(path.resolve(UPLOAD_DIR, name), (err) => {
+    if (err) {
+      res.status((err as any).status).json({
+        message: USERS_MESSAGES.IMAGE_NOT_FOUND
+      })
+    }
+  })
 }

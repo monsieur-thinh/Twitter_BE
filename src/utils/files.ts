@@ -2,9 +2,15 @@ import { Request, Response } from 'express'
 import { File } from 'formidable'
 import fs from 'fs'
 import path from 'path'
-import { UPLOAD_TEMP_DIR } from '~/constants/dir'
+import { UPLOAD_DIR, UPLOAD_TEMP_DIR } from '~/constants/dir'
 
 export const initFolder = () => {
+  if (!fs.existsSync(UPLOAD_DIR)) {
+    fs.mkdirSync(UPLOAD_DIR, {
+      recursive: true
+    })
+  }
+
   if (!fs.existsSync(UPLOAD_TEMP_DIR)) {
     fs.mkdirSync(UPLOAD_TEMP_DIR, {
       recursive: true // mục đích để tạo folder nested
@@ -19,8 +25,12 @@ export const handleUploadSingleImage = async (req: Request): Promise<File> => {
     maxFiles: 1,
     keepExtensions: true,
     maxFileSize: 4000 * 1024, //300kb,
-    filter: ({ name, mimetype }) => {
-      const valid = name === 'image' && Boolean(mimetype?.includes('image/'))
+    filter: ({ name, mimetype, originalFilename }) => {
+      const isImageMimeType = Boolean(mimetype?.startsWith('image/'))
+      const isImageExtension = Boolean(originalFilename?.match(/\.(png|jpe?g|gif|webp|bmp)$/i))
+      const isAllowedFieldName = name === 'image' || name === 'file'
+      const valid = isAllowedFieldName && (isImageMimeType || isImageExtension)
+
       if (!valid) {
         form.emit('error' as any, new Error('File type is not valid') as any)
       }
@@ -32,11 +42,14 @@ export const handleUploadSingleImage = async (req: Request): Promise<File> => {
       if (err) {
         return reject(err)
       }
+
+      const uploadedFiles = files.image ?? files.file
+
       // eslint-disable-next-line no-extra-boolean-cast
-      if (!Boolean(files.image)) {
+      if (!Boolean(uploadedFiles)) {
         return reject(new Error('File is emplty'))
       }
-      resolve((files.image as File[])[0])
+      resolve((uploadedFiles as File[])[0])
     })
   })
 }
